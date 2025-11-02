@@ -1,0 +1,370 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Schools - ZebEduApplication{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2><i class="fas fa-school"></i> Browse High Schools</h2>
+            <p class="text-muted">Find and apply to the best schools in your area</p>
+        </div>
+        <div class="col-md-6">
+            <div class="d-flex gap-2 justify-content-end">
+                {% if current_user.role == 'student' %}
+                <a href="{{ url_for('application_form') }}" class="btn btn-success">
+                    <i class="fas fa-file-alt"></i> Fill Application Form (with AI)
+                </a>
+                {% endif %}
+                <button class="btn btn-info" onclick="detectLocation()">
+                    <i class="fas fa-map-marker-alt"></i> Detect My Location
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    {% if current_user.role == 'student' %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-success alert-dismissible fade show">
+                <h5 class="alert-heading">
+                    <i class="fas fa-lightbulb"></i> New! Smart Application Form with AI Assistant
+                </h5>
+                <p class="mb-2">
+                    <strong>Fill your application form online with FREE AI help!</strong> Our AI assistant will:
+                </p>
+                <ul class="mb-2">
+                    <li>Help you understand each field</li>
+                    <li>Guide you in writing motivation letters</li>
+                    <li>Provide examples and tips</li>
+                    <li>Let you download a completed PDF</li>
+                </ul>
+                <a href="{{ url_for('application_form') }}" class="btn btn-success btn-sm">
+                    <i class="fas fa-rocket"></i> Get Started Now
+                </a>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="GET" action="{{ url_for('schools') }}" id="filterForm">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="form-label">Filter by Suburb/Location</label>
+                                <select class="form-select" name="suburb" onchange="this.form.submit()">
+                                    <option value="">All Suburbs</option>
+                                    {% for suburb in suburbs %}
+                                        <option value="{{ suburb }}" {% if selected_suburb == suburb %}selected{% endif %}>
+                                            {{ suburb }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Filter by District</label>
+                                <select class="form-select" name="district" onchange="this.form.submit()">
+                                    <option value="">All Districts</option>
+                                    {% for district in districts %}
+                                        <option value="{{ district }}" {% if selected_district == district %}selected{% endif %}>
+                                            {{ district }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Search School</label>
+                                <input type="text" class="form-control" id="searchInput" placeholder="Search by name...">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">&nbsp;</label>
+                                <button type="button" class="btn btn-secondary d-block w-100" onclick="resetFilters()">
+                                    <i class="fas fa-redo"></i> Reset Filters
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if selected_suburb %}
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="alert alert-info alert-dismissible fade show">
+                    <i class="fas fa-map-marker-alt"></i> 
+                    <strong>Showing schools in: {{ selected_suburb }}</strong>
+                    <a href="{{ url_for('schools') }}" class="btn btn-sm btn-outline-info ms-3">
+                        View All Schools
+                    </a>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="row" id="schoolsList">
+        {% if schools %}
+            {% for school in schools %}
+            <div class="col-md-6 col-lg-4 mb-4 school-card" data-name="{{ school.name|lower }}">
+                <div class="card h-100 shadow-sm hover-shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">{{ school.name }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2">
+                            <i class="fas fa-map-pin text-danger"></i> 
+                            <strong>Suburb:</strong> {{ school.suburb }}
+                        </p>
+                        <p class="mb-2">
+                            <i class="fas fa-map-marker-alt text-info"></i> 
+                            <strong>District:</strong> {{ school.district }}
+                        </p>
+                        <p class="mb-2">
+                            <i class="fas fa-map text-success"></i> 
+                            <strong>Province:</strong> {{ school.province }}
+                        </p>
+                        
+                        {% if school.pass_rate %}
+                        <p class="mb-2">
+                            <i class="fas fa-chart-line text-primary"></i> 
+                            <strong>Pass Rate:</strong> {{ school.pass_rate }}%
+                        </p>
+                        <div class="progress mb-3" style="height: 10px;">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: {{ school.pass_rate }}%"></div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if school.contact_number %}
+                        <p class="mb-2">
+                            <i class="fas fa-phone text-warning"></i> 
+                            {{ school.contact_number }}
+                        </p>
+                        {% endif %}
+                        
+                        {% if school.address %}
+                        <p class="mb-2">
+                            <i class="fas fa-location-dot text-secondary"></i> 
+                            {{ school.address[:50] }}{% if school.address|length > 50 %}...{% endif %}
+                        </p>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer bg-light">
+                        {% if current_user.role == 'student' %}
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('application_form') }}" class="btn btn-success btn-sm">
+                                    <i class="fas fa-file-alt"></i> Fill Form First
+                                </a>
+                                <button class="btn btn-primary" onclick="applyToSchool({{ school.id }}, '{{ school.name }}')">
+                                    <i class="fas fa-paper-plane"></i> Apply Now
+                                </button>
+                            </div>
+                        {% else %}
+                            <button class="btn btn-info w-100" onclick="viewSchoolDetails({{ school.id }})">
+                                <i class="fas fa-eye"></i> View Details
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle fa-3x mb-3"></i>
+                    <h5>No schools found</h5>
+                    <p>Try adjusting your filters or contact the admin to add more schools.</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="modal fade" id="applicationModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Apply to <span id="schoolName"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" id="applicationForm" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="alert alert-success">
+                        <i class="fas fa-lightbulb"></i> <strong>Pro Tip:</strong> 
+                        <a href="{{ url_for('application_form') }}" target="_blank" class="alert-link">
+                            Use our AI-powered form to fill your application
+                        </a> 
+                        and download it as PDF to upload here!
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Please complete all required fields and upload necessary documents.
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Motivation Letter *</label>
+                        <textarea class="form-control" name="motivation_letter" rows="5" 
+                                  placeholder="Tell us why you want to attend this school..." required></textarea>
+                        <div class="form-text">
+                            Minimum 100 characters
+                            <a href="{{ url_for('application_form') }}" target="_blank">
+                                <i class="fas fa-robot"></i> Get AI help with writing
+                            </a>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <h6 class="mb-3"><i class="fas fa-paperclip"></i> Upload Documents</h6>
+                    
+                    <div class="alert alert-warning mb-3">
+                        <i class="fas fa-info-circle"></i> 
+                        <strong>Have you filled the application form?</strong>
+                        <a href="{{ url_for('application_form') }}" target="_blank" class="alert-link">
+                            Click here to fill it with AI assistance
+                        </a>
+                        and download the completed PDF!
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-file-pdf text-danger"></i> Previous School Report
+                            <span class="badge bg-warning">Recommended</span>
+                        </label>
+                        <input type="file" class="form-control" name="previous_report" accept=".pdf,.jpg,.jpeg,.png">
+                        <div class="form-text">Upload your most recent school report (PDF, JPG, PNG - Max 5MB)</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-certificate text-primary"></i> Birth Certificate/ID/Passport
+                            <span class="badge bg-warning">Recommended</span>
+                        </label>
+                        <input type="file" class="form-control" name="birth_certificate" accept=".pdf,.jpg,.jpeg,.png">
+                        <div class="form-text">Upload birth certificate/ID/Passport</div>
+                        
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-home text-success"></i> Proof of Residence
+                        </label>
+                        <input type="file" class="form-control" name="proof_of_residence" accept=".pdf,.jpg,.jpeg,.png">
+                        <div class="form-text">Utility bill, lease agreement, or affidavit</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-id-card text-info"></i> Form
+                        </label>
+                        <input type="file" class="form-control" name="id_document" accept=".pdf,.jpg,.jpeg,.png">
+                        <div class="form-text">upload your form here</div>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        <strong>Note:</strong> While document uploads are optional, submitting all documents increases your chances of approval.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Submit Application
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('searchInput').addEventListener('keyup', function() {
+    const searchTerm = this.value.toLowerCase();
+    const schoolCards = document.querySelectorAll('.school-card');
+    
+    schoolCards.forEach(card => {
+        const schoolName = card.getAttribute('data-name');
+        if (schoolName.includes(searchTerm)) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+});
+
+function detectLocation() {
+    if (navigator.geolocation) {
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Detecting...';
+        btn.disabled = true;
+        
+        navigator.geolocation.getCurrentPosition(function(position) {
+            fetch('/api/detect-location', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(`📍 Location Detected!\n\nSuburb: ${data.suburb}\nDistrict: ${data.district}\nProvince: ${data.province}\n\nShowing schools in ${data.suburb}...`);
+                window.location.href = '/schools?suburb=' + encodeURIComponent(data.suburb);
+            })
+            .catch(error => {
+                alert('Error detecting location. Please try again.');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }, function(error) {
+            alert('Unable to detect location: ' + error.message);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+    } else {
+        alert('Geolocation is not supported by your browser');
+    }
+}
+
+function resetFilters() {
+    window.location.href = '/schools';
+}
+
+let selectedSchoolId = null;
+
+function applyToSchool(schoolId, schoolName) {
+    selectedSchoolId = schoolId;
+    document.getElementById('schoolName').textContent = schoolName;
+    document.getElementById('applicationForm').action = '/apply/' + schoolId;
+    
+    const modal = new bootstrap.Modal(document.getElementById('applicationModal'));
+    modal.show();
+}
+
+function viewSchoolDetails(schoolId) {
+    alert('School details view - Coming soon!');
+}
+
+const style = document.createElement('style');
+style.textContent = `
+    .hover-shadow {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .hover-shadow:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

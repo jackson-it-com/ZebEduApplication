@@ -1,0 +1,455 @@
+{% extends "base.html" %}
+
+{% block title %}Application Details - ZebEduApplication{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <a href="{% if current_user.role == 'admin' %}{{ url_for('admin_dashboard') }}{% else %}{{ url_for('student_dashboard') }}{% endif %}" class="btn btn-secondary mb-3">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Application Info Card -->
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-file-alt"></i> Application #{{ application.id }}
+                        {% if application.status == 'pending' %}
+                            <span class="badge bg-warning float-end">Pending</span>
+                        {% elif application.status == 'approved' %}
+                            <span class="badge bg-success float-end">Approved</span>
+                        {% elif application.status == 'rejected' %}
+                            <span class="badge bg-danger float-end">Rejected</span>
+                        {% elif application.status == 'cancelled' %}
+                            <span class="badge bg-secondary float-end">Cancelled</span>
+                        {% else %}
+                            <span class="badge bg-info float-end">{{ application.status|title }}</span>
+                        {% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- School Information -->
+                    <h5><i class="fas fa-school"></i> School Information</h5>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>School Name:</strong><br>{{ application.school.name }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>District:</strong><br>{{ application.school.district }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Province:</strong><br>{{ application.school.province }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Pass Rate:</strong><br>
+                                {% if application.school.pass_rate %}
+                                    <span class="badge bg-success">{{ application.school.pass_rate }}%</span>
+                                {% else %}
+                                    <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Student Information -->
+                    <h5><i class="fas fa-user"></i> Student Information</h5>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>Full Name:</strong><br>{{ application.student.full_name }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Email:</strong><br>{{ application.student.email }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Phone:</strong><br>{{ application.student.phone_number or 'Not provided' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>ID Number:</strong><br>{{ application.student.id_number or 'Not provided' }}</p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Motivation Letter -->
+                    <h5><i class="fas fa-file-alt"></i> Motivation Letter</h5>
+                    {% if application.motivation_letter %}
+                        <div class="card bg-light border-primary">
+                            <div class="card-body">
+                                <div style="white-space: pre-wrap; font-family: 'Georgia', serif; line-height: 1.8; font-size: 1.05rem;">
+                                    {{ application.motivation_letter }}
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle"></i> Character count: {{ application.motivation_letter|length }}
+                                </small>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i> No motivation letter provided.
+                        </div>
+                    {% endif %}
+
+                    <hr>
+
+                    <!-- Uploaded Documents -->
+                    <h5><i class="fas fa-paperclip"></i> Uploaded Documents</h5>
+
+                    <!-- Missing Documents Alert (Admin Only) -->
+                    {% if current_user.role == 'admin' %}
+                        {% set missing_docs = [] %}
+                        {% if not application.previous_report %}{% set _ = missing_docs.append('Previous Report') %}{% endif %}
+                        {% if not application.birth_certificate %}{% set _ = missing_docs.append('Birth Certificate/id/passport') %}{% endif %}
+                        {% if not application.proof_of_residence %}{% set _ = missing_docs.append('Proof of Residence') %}{% endif %}
+                        {% if not application.id_document %}{% set _ = missing_docs.append('ID Document') %}{% endif %}
+                        
+                        {% if missing_docs %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i> <strong>Missing Documents:</strong>
+                                <ul class="mb-0 mt-2">
+                                    {% for doc in missing_docs %}
+                                        <li>{{ doc }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle"></i> All required documents have been uploaded.
+                            </div>
+                        {% endif %}
+                    {% endif %}
+
+                    <div class="row">
+                        <!-- Previous Report -->
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-file-pdf text-danger"></i> Previous School Report
+                                    </h6>
+                                    {% if application.previous_report %}
+                                        <p class="text-success mb-2">
+                                            <i class="fas fa-check-circle"></i> Uploaded
+                                        </p>
+                                        <a href="{{ url_for('static', filename=application.previous_report) }}" 
+                                           class="btn btn-sm btn-info" target="_blank">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    {% else %}
+                                        <p class="text-muted mb-0">
+                                            <i class="fas fa-times-circle"></i> Not uploaded
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Birth Certificate -->
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-certificate text-primary"></i> Birth Certificate or ID or Passport
+                                    </h6>
+                                    {% if application.birth_certificate %}
+                                        <p class="text-success mb-2">
+                                            <i class="fas fa-check-circle"></i> Uploaded
+                                        </p>
+                                        <a href="{{ url_for('static', filename=application.birth_certificate) }}" 
+                                           class="btn btn-sm btn-info" target="_blank">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    {% else %}
+                                        <p class="text-muted mb-0">
+                                            <i class="fas fa-times-circle"></i> Not uploaded
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Proof of Residence -->
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-home text-success"></i> Proof of Residence
+                                    </h6>
+                                    {% if application.proof_of_residence %}
+                                        <p class="text-success mb-2">
+                                            <i class="fas fa-check-circle"></i> Uploaded
+                                        </p>
+                                        <a href="{{ url_for('static', filename=application.proof_of_residence) }}" 
+                                           class="btn btn-sm btn-info" target="_blank">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    {% else %}
+                                        <p class="text-muted mb-0">
+                                            <i class="fas fa-times-circle"></i> Not uploaded
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ID Document -->
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-id-card text-info"></i> Form 
+                                    </h6>
+                                    {% if application.id_document %}
+                                        <p class="text-success mb-2">
+                                            <i class="fas fa-check-circle"></i> Uploaded
+                                        </p>
+                                        <a href="{{ url_for('static', filename=application.id_document) }}" 
+                                           class="btn btn-sm btn-info" target="_blank">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    {% else %}
+                                        <p class="text-muted mb-0">
+                                            <i class="fas fa-times-circle"></i> Not uploaded
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if current_user.role == 'admin' and application.admin_notes %}
+                        <hr>
+                        <h5><i class="fas fa-sticky-note"></i> Admin Notes</h5>
+                        <div class="alert alert-info">
+                            {{ application.admin_notes }}
+                        </div>
+                    {% endif %}
+
+                    {% if application.admin_notes and current_user.role == 'student' %}
+                        <hr>
+                        <h5>
+                            <i class="fas fa-info-circle"></i> Review Notes
+                        </h5>
+                        <div class="alert {% if application.status == 'rejected' %}alert-danger{% else %}alert-info{% endif %}">
+                            {{ application.admin_notes }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline & Actions Card -->
+        <div class="col-md-4">
+            <!-- Timeline -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-history"></i> Timeline</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="timeline">
+                        <li class="mb-3">
+                            <i class="fas fa-paper-plane text-primary"></i>
+                            <strong>Submitted</strong>
+                            <br><small class="text-muted">{{ application.applied_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </li>
+                        {% if application.viewed_by_admin %}
+                        <li class="mb-3">
+                            <i class="fas fa-eye text-info"></i>
+                            <strong>Viewed by Admin</strong>
+                            <br><small class="text-muted">Application reviewed</small>
+                        </li>
+                        {% endif %}
+                        {% if application.reviewed_at %}
+                        <li class="mb-3">
+                            {% if application.status == 'approved' %}
+                                <i class="fas fa-check-circle text-success"></i>
+                            {% elif application.status == 'rejected' %}
+                                <i class="fas fa-times-circle text-danger"></i>
+                            {% elif application.status == 'cancelled' %}
+                                <i class="fas fa-ban text-secondary"></i>
+                            {% else %}
+                                <i class="fas fa-hourglass-half text-warning"></i>
+                            {% endif %}
+                            <strong>{{ application.status|title }}</strong>
+                            <br><small class="text-muted">{{ application.reviewed_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Actions (Admin Only) -->
+            {% if current_user.role == 'admin' and application.status == 'pending' %}
+            <div class="card shadow mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-tasks"></i> Actions</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('review_application', app_id=application.id) }}">
+                        <div class="mb-3">
+                            <label class="form-label">Decision *</label>
+                            <select class="form-select" name="status" required>
+                                <option value="">Select decision...</option>
+                                <option value="under_review">Under Review</option>
+                                <option value="approved">Approve</option>
+                                <option value="rejected">Reject</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Admin Notes</label>
+                            <textarea class="form-control" name="admin_notes" rows="3" placeholder="Add notes about this decision..."></textarea>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check"></i> Submit Decision
+                            </button>
+                            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#messageModal">
+                                <i class="fas fa-envelope"></i> Message Student
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Student Actions - Cancel Button -->
+            {% if current_user.role == 'student' and application.status == 'pending' %}
+            <div class="card shadow mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Cancel Application</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">If you wish to cancel this application, click the button below.</p>
+                    <button class="btn btn-danger w-100" onclick="cancelApplication({{ application.id }}, '{{ application.school.name }}')">
+                        <i class="fas fa-times-circle"></i> Cancel Application
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Student Contact Card -->
+            {% if current_user.role == 'student' %}
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-envelope"></i> Contact</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Need help with your application?</p>
+                    <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#messageModal">
+                        <i class="fas fa-envelope"></i> Message Admin
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Application Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fas fa-exclamation-triangle"></i> Cancel Application</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" id="cancelForm">
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Are you sure you want to cancel your application?
+                    </div>
+                    <p>You are about to cancel your application to:</p>
+                    <h5 id="cancelSchoolName" class="text-primary"></h5>
+                    <hr>
+                    <div class="mb-3">
+                        <label class="form-label">Reason for Cancellation (Optional)</label>
+                        <textarea class="form-control" name="cancellation_reason" rows="3" 
+                                  placeholder="Let us know why you're cancelling..."></textarea>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> <strong>Note:</strong> Once cancelled, you can apply again later if you change your mind.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-arrow-left"></i> Keep Application
+                    </button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-times-circle"></i> Yes, Cancel Application
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Message Modal -->
+<div class="modal fade" id="messageModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Send Message</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('send_message') }}">
+                <div class="modal-body">
+                    <input type="hidden" name="receiver_id" value="{% if current_user.role == 'student' %}1{% else %}{{ application.student.id }}{% endif %}">
+                    <input type="hidden" name="application_id" value="{{ application.id }}">
+                    <div class="mb-3">
+                        <label class="form-label">Subject</label>
+                        <input type="text" class="form-control" name="subject" value="Re: Application #{{ application.id }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Message</label>
+                        <textarea class="form-control" name="body" rows="4" required placeholder="Type your message here..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Send
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function cancelApplication(appId, schoolName) {
+    // Set the school name in the modal
+    document.getElementById('cancelSchoolName').textContent = schoolName;
+    
+    // Set the form action
+    document.getElementById('cancelForm').action = '/application/' + appId + '/cancel';
+    
+    // Show the modal
+    const modal = new bootstrap.Modal(document.getElementById('cancelModal'));
+    modal.show();
+}
+</script>
+
+<style>
+.timeline {
+    list-style: none;
+    padding-left: 0;
+}
+.timeline li {
+    position: relative;
+    padding-left: 30px;
+}
+.timeline li i {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+</style>
+{% endblock %}

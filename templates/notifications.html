@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications - ZebEduApplication{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-bell"></i> Notifications</h2>
+                <button class="btn btn-sm btn-primary" onclick="markAllAsRead()">
+                    <i class="fas fa-check-double"></i> Mark All as Read
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            {% if notifications %}
+                <div class="list-group">
+                    {% for notif in notifications %}
+                    <div class="list-group-item {% if not notif.read %}bg-light border-start border-primary border-4{% endif %}" id="notif-{{ notif.id }}">
+                        <div class="d-flex w-100 justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas {{ notif.icon }} fa-2x text-primary me-3"></i>
+                                    <div>
+                                        <h5 class="mb-1">
+                                            {{ notif.title }}
+                                            {% if not notif.read %}
+                                                <span class="badge bg-primary">New</span>
+                                            {% endif %}
+                                        </h5>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock"></i> {{ notif.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                        </small>
+                                    </div>
+                                </div>
+                                <p class="mb-2">{{ notif.message }}</p>
+                                {% if notif.link %}
+                                    <a href="{{ notif.link }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-arrow-right"></i> View Details
+                                    </a>
+                                {% endif %}
+                            </div>
+                            {% if not notif.read %}
+                                <button class="btn btn-sm btn-success ms-3" onclick="markAsRead({{ notif.id }})">
+                                    <i class="fas fa-check"></i> Mark Read
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                    <h5>No Notifications</h5>
+                    <p class="text-muted">You're all caught up! No new notifications.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function markAsRead(notifId) {
+    fetch(`/notifications/${notifId}/read`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function markAllAsRead() {
+    fetch('/notifications/mark-all-read', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+</script>
+{% endblock %}

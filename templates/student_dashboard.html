@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard - ZebEduApplication{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">
+                <i class="fas fa-dashboard"></i> Welcome, {{ current_user.full_name }}!
+            </h2>
+        </div>
+    </div>
+    
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white shadow">
+                <div class="card-body">
+                    <h5><i class="fas fa-file-alt"></i> Total Applications</h5>
+                    <h2 class="mb-0">{{ applications|length }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-warning text-white shadow">
+                <div class="card-body">
+                    <h5><i class="fas fa-clock"></i> Pending</h5>
+                    <h2 class="mb-0">{{ applications|selectattr('status', 'equalto', 'pending')|list|length }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white shadow">
+                <div class="card-body">
+                    <h5><i class="fas fa-check-circle"></i> Approved</h5>
+                    <h2 class="mb-0">{{ applications|selectattr('status', 'equalto', 'approved')|list|length }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Quick Actions</h5>
+                    <a href="{{ url_for('schools') }}" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Find Schools
+                    </a>
+                    <button class="btn btn-info" onclick="detectLocation()">
+                        <i class="fas fa-map-marker-alt"></i> Detect My Location
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- My Applications -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-list"></i> My Applications</h4>
+                </div>
+                <div class="card-body">
+                    {% if applications %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>School Name</th>
+                                        <th>District</th>
+                                        <th>Applied Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for app in applications %}
+                                    <tr>
+                                        <td>{{ app.school.name }}</td>
+                                        <td>{{ app.school.district }}</td>
+                                        <td>{{ app.applied_at.strftime('%Y-%m-%d') }}</td>
+                                        <td>
+                                            {% if app.status == 'pending' %}
+                                                <span class="badge bg-warning">Pending</span>
+                                            {% elif app.status == 'approved' %}
+                                                <span class="badge bg-success">Approved</span>
+                                            {% elif app.status == 'rejected' %}
+                                                <span class="badge bg-danger">Rejected</span>
+                                            {% else %}
+                                                <span class="badge bg-info">{{ app.status|title }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('view_application', app_id=app.id) }}" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                            {% if app.status == 'pending' %}
+                                                <button class="btn btn-sm btn-danger" onclick="cancelApplication({{ app.id }}, '{{ app.school.name }}')">
+                                                    <i class="fas fa-times"></i> Cancel
+                                                </button>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <h5>No Applications Yet</h5>
+                            <p class="text-muted">Start by browsing schools and submitting your first application</p>
+                            <a href="{{ url_for('schools') }}" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Browse Schools
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Application Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fas fa-exclamation-triangle"></i> Cancel Application</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" id="cancelForm">
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Are you sure you want to cancel your application?
+                    </div>
+                    <p>You are about to cancel your application to:</p>
+                    <h5 id="cancelSchoolName" class="text-primary"></h5>
+                    <hr>
+                    <div class="mb-3">
+                        <label class="form-label">Reason for Cancellation (Optional)</label>
+                        <textarea class="form-control" name="cancellation_reason" rows="3" 
+                                  placeholder="Let us know why you're cancelling..."></textarea>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> <strong>Note:</strong> Once cancelled, you can apply again later if you change your mind.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-arrow-left"></i> Keep Application
+                    </button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-times-circle"></i> Yes, Cancel Application
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function detectLocation() {
+    if (navigator.geolocation) {
+        // Show loading
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Detecting Location...';
+        btn.disabled = true;
+        
+        navigator.geolocation.getCurrentPosition(function(position) {
+            fetch('/api/detect-location', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Show location info
+                const message = `📍 Your Location:\n\nSuburb: ${data.suburb}\nDistrict: ${data.district}\nProvince: ${data.province}\n\nClick OK to see schools in ${data.suburb}`;
+                
+                if (confirm(message)) {
+                    window.location.href = '/schools?suburb=' + encodeURIComponent(data.suburb);
+                } else {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            })
+            .catch(error => {
+                alert('Error detecting location: ' + error.message);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }, function(error) {
+            alert('Unable to detect location: ' + error.message);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+    } else {
+        alert('Geolocation is not supported by your browser');
+    }
+}
+
+function cancelApplication(appId, schoolName) {
+    // Set the school name in the modal
+    document.getElementById('cancelSchoolName').textContent = schoolName;
+    
+    // Set the form action
+    document.getElementById('cancelForm').action = '/application/' + appId + '/cancel';
+    
+    // Show the modal
+    const modal = new bootstrap.Modal(document.getElementById('cancelModal'));
+    modal.show();
+}
+</script>
+{% endblock %}

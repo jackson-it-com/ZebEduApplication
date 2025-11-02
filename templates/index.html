@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Home - ZebEduApplication{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section bg-primary text-white py-5">
+    <div class="container text-center">
+        <h1 class="display-4 mb-4">
+            <i class="fas fa-graduation-cap"></i> Welcome to ZebEduApplication
+        </h1>
+        <p class="lead mb-4">
+            Your gateway to finding and applying to the best high schools in South Africa
+        </p>
+     
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container my-5">
+    <h2 class="text-center mb-5">Why Choose ZebEduApplication?</h2>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="feature-icon bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-map-marker-alt fa-2x"></i>
+                    </div>
+                    <h4>Location-Based Search</h4>
+                    <p>Automatically find schools in your district based on your location</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="feature-icon bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-chart-line fa-2x"></i>
+                    </div>
+                    <h4>Performance Ranking</h4>
+                    <p>View schools ranked by their academic performance and success rates</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="feature-icon bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-file-alt fa-2x"></i>
+                    </div>
+                    <h4>Easy Application</h4>
+                    <p>Apply to multiple schools with a simple, streamlined process</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- How It Works -->
+<div class="bg-light py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">How It Works</h2>
+        <div class="row">
+            <div class="col-md-3 text-center mb-4">
+                <div class="step-number bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <span class="h3 mb-0">1</span>
+                </div>
+                <h5>Create Account</h5>
+                <p>Register with your details</p>
+            </div>
+            <div class="col-md-3 text-center mb-4">
+                <div class="step-number bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <span class="h3 mb-0">2</span>
+                </div>
+                <h5>Find Schools</h5>
+                <p>Browse schools in your area</p>
+            </div>
+            <div class="col-md-3 text-center mb-4">
+                <div class="step-number bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <span class="h3 mb-0">3</span>
+                </div>
+                <h5>Submit Application</h5>
+                <p>Apply to your chosen schools</p>
+            </div>
+            <div class="col-md-3 text-center mb-4">
+                <div class="step-number bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <span class="h3 mb-0">4</span>
+                </div>
+                <h5>Track Status</h5>
+                <p>Monitor your applications</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="container text-center my-5 py-5">
+    <h2 class="mb-4">Ready to Find Your Perfect School?</h2>
+    <p class="lead mb-4">Join thousands of students finding their ideal high school today</p>
+    {% if not current_user.is_authenticated %}
+        <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">
+            <i class="fas fa-rocket"></i> Get Started Now
+        </a>
+    {% endif %}
+</div>
+{% endblock %}

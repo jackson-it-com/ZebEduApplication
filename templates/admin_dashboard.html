@@ -1,0 +1,358 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - ZebEduApplication{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">
+                <i class="fas fa-user-shield"></i> Admin Dashboard
+            </h2>
+        </div>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Total Students</h6>
+                            <h2 class="mb-0">{{ total_students }}</h2>
+                        </div>
+                        <i class="fas fa-users fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-success text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Total Schools</h6>
+                            <h2 class="mb-0">{{ total_schools }}</h2>
+                        </div>
+                        <i class="fas fa-school fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-info text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Total Applications</h6>
+                            <h2 class="mb-0">{{ total_applications }}</h2>
+                        </div>
+                        <i class="fas fa-file-alt fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-warning text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Pending Review</h6>
+                            <h2 class="mb-0">{{ pending_applications }}</h2>
+                        </div>
+                        <i class="fas fa-clock fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Quick Actions</h5>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSchoolModal">
+                        <i class="fas fa-plus"></i> Add New School
+                    </button>
+                    <a href="{{ url_for('schools') }}" class="btn btn-info">
+                        <i class="fas fa-school"></i> View All Schools
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Applications -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-list"></i> Recent Applications</h4>
+                </div>
+                <div class="card-body">
+                    {% if recent_applications %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Student</th>
+                                        <th>School</th>
+                                        <th>Applied Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for app in recent_applications %}
+                                    <tr>
+                                        <td>#{{ app.id }}</td>
+                                        <td>{{ app.student.full_name }}</td>
+                                        <td>{{ app.school.name }}</td>
+                                        <td>{{ app.applied_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>
+                                            {% if app.status == 'pending' %}
+                                                <span class="badge bg-warning">Pending</span>
+                                            {% elif app.status == 'approved' %}
+                                                <span class="badge bg-success">Approved</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Rejected</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if app.status == 'pending' %}
+                                                <a href="{{ url_for('view_application', app_id=app.id) }}" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i> View
+                                                </a>
+                                                <button class="btn btn-sm btn-success" onclick="reviewApplication({{ app.id }}, 'approved')">
+                                                    <i class="fas fa-check"></i> Approve
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" onclick="openRejectModal({{ app.id }})">
+                                                    <i class="fas fa-times"></i> Reject
+                                                </button>
+                                            {% else %}
+                                                <a href="{{ url_for('view_application', app_id=app.id) }}" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i> View
+                                                </a>
+                                                <button class="btn btn-sm btn-warning" onclick="undoReview({{ app.id }})">
+                                                    <i class="fas fa-undo"></i> Undo
+                                                </button>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <h5>No Applications Yet</h5>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add School Modal -->
+<div class="modal fade" id="addSchoolModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New School</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addSchoolForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">School Name *</label>
+                            <input type="text" class="form-control" name="name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">District *</label>
+                            <input type="text" class="form-control" name="district" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Province *</label>
+                            <select class="form-control" name="province" required>
+                                <option value="">Select Province</option>
+                                <option value="Gauteng">Gauteng</option>
+                                <option value="Western Cape">Western Cape</option>
+                                <option value="KwaZulu-Natal">KwaZulu-Natal</option>
+                                <option value="Eastern Cape">Eastern Cape</option>
+                                <option value="Limpopo">Limpopo</option>
+                                <option value="Mpumalanga">Mpumalanga</option>
+                                <option value="North West">North West</option>
+                                <option value="Free State">Free State</option>
+                                <option value="Northern Cape">Northern Cape</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Pass Rate (%)</label>
+                            <input type="number" class="form-control" name="pass_rate" min="0" max="100">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Address</label>
+                        <textarea class="form-control" name="address" rows="2"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Contact Number</label>
+                            <input type="tel" class="form-control" name="contact_number">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" name="email">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveSchool()">Save School</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Application Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fas fa-times-circle"></i> Reject Application</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" id="rejectForm">
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> You are about to reject this application. Please provide a reason.
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Reason for Rejection *</label>
+                        <select class="form-select mb-2" id="rejectReason" onchange="updateRejectTextarea()">
+                            <option value="">Select a reason...</option>
+                            <option value="School is full - No available spaces">School is full - No available spaces</option>
+                            <option value="Incomplete application - Missing required documents">Incomplete application - Missing required documents</option>
+                            <option value="Does not meet admission requirements">Does not meet admission requirements</option>
+                            <option value="Application submitted after deadline">Application submitted after deadline</option>
+                            <option value="Student resides outside school district">Student resides outside school district</option>
+                            <option value="Other">Other (Please specify)</option>
+                        </select>
+                        <textarea class="form-control" name="admin_notes" id="adminNotes" rows="4" 
+                                  placeholder="Provide detailed reason for rejection..." required></textarea>
+                        <small class="text-muted">This message will be sent to the student.</small>
+                    </div>
+                    <input type="hidden" name="status" value="rejected">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-arrow-left"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-times-circle"></i> Reject Application
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Undo Review Modal -->
+<div class="modal fade" id="undoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title"><i class="fas fa-undo"></i> Undo Review Decision</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" id="undoForm">
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> This will reset the application status back to "Pending" for re-review.
+                    </div>
+                    <p>Are you sure you want to undo the review decision for this application?</p>
+                    <input type="hidden" name="status" value="pending">
+                    <input type="hidden" name="admin_notes" value="Review decision was undone by administrator. Application reset to pending status.">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-undo"></i> Yes, Undo Review
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentAppId = null;
+
+function reviewApplication(appId, status) {
+    if (confirm('Are you sure you want to approve this application?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/admin/applications/' + appId + '/review';
+        
+        const statusInput = document.createElement('input');
+        statusInput.type = 'hidden';
+        statusInput.name = 'status';
+        statusInput.value = status;
+        
+        const notesInput = document.createElement('input');
+        notesInput.type = 'hidden';
+        notesInput.name = 'admin_notes';
+        notesInput.value = 'Application approved by administrator.';
+        
+        form.appendChild(statusInput);
+        form.appendChild(notesInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function openRejectModal(appId) {
+    currentAppId = appId;
+    document.getElementById('rejectForm').action = '/admin/applications/' + appId + '/review';
+    document.getElementById('rejectReason').value = '';
+    document.getElementById('adminNotes').value = '';
+    const modal = new bootstrap.Modal(document.getElementById('rejectModal'));
+    modal.show();
+}
+
+function updateRejectTextarea() {
+    const select = document.getElementById('rejectReason');
+    const textarea = document.getElementById('adminNotes');
+    
+    if (select.value && select.value !== 'Other') {
+        textarea.value = select.value;
+    } else if (select.value === 'Other') {
+        textarea.value = '';
+        textarea.focus();
+    }
+}
+
+function undoReview(appId) {
+    document.getElementById('undoForm').action = '/admin/applications/' + appId + '/review';
+    const modal = new bootstrap.Modal(document.getElementById('undoModal'));
+    modal.show();
+}
+
+function saveSchool() {
+    alert('Add school functionality - will be implemented with backend endpoint');
+}
+</script>
+{% endblock %}

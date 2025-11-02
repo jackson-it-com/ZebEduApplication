@@ -1,0 +1,710 @@
+{% extends "base.html" %}
+
+{% block title %}Application Form - ZebEduApplication{% endblock %}
+
+{% block content %}
+<div class="container-fluid my-4">
+    <div class="row">
+        <!-- Main Form Area (Left Side) -->
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-file-alt"></i> School Application Form
+                        <span class="float-end">
+                            <button class="btn btn-light btn-sm" onclick="downloadForm()">
+                                <i class="fas fa-download"></i> Download PDF
+                            </button>
+                        </span>
+                    </h4>
+                </div>
+                <div class="card-body" id="applicationForm">
+                    <form id="mainApplicationForm">
+                        <!-- Personal Information -->
+                        <div class="section mb-4">
+                            <h5 class="text-primary border-bottom pb-2">
+                                <i class="fas fa-user"></i> Personal Information
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Full Name *</label>
+                                    <input type="text" class="form-control" id="fullName" required>
+                                    <button type="button" class="btn btn-link btn-sm p-0" onclick="askAI('What should I write in Full Name?')">
+                                        <i class="fas fa-question-circle"></i> Need help?
+                                    </button>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">ID Number *</label>
+                                    <input type="text" class="form-control" id="idNumber" placeholder="0000000000000" required>
+                                    <button type="button" class="btn btn-link btn-sm p-0" onclick="askAI('What is an ID Number and how do I format it?')">
+                                        <i class="fas fa-question-circle"></i> Need help?
+                                    </button>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Date of Birth *</label>
+                                    <input type="date" class="form-control" id="dob" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Gender *</label>
+                                    <select class="form-select" id="gender" required>
+                                        <option value="">Select gender...</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Phone Number *</label>
+                                    <input type="tel" class="form-control" id="phone" placeholder="0123456789" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Email Address *</label>
+                                    <input type="email" class="form-control" id="email" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Residential Address -->
+                        <div class="section mb-4">
+                            <h5 class="text-primary border-bottom pb-2">
+                                <i class="fas fa-home"></i> Residential Address
+                            </h5>
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Street Address *</label>
+                                    <input type="text" class="form-control" id="streetAddress" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Suburb *</label>
+                                    <input type="text" class="form-control" id="suburb" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">City *</label>
+                                    <input type="text" class="form-control" id="city" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Province *</label>
+                                    <select class="form-select" id="province" required>
+                                        <option value="">Select province...</option>
+                                        <option value="Gauteng">Gauteng</option>
+                                        <option value="Western Cape">Western Cape</option>
+                                        <option value="KwaZulu-Natal">KwaZulu-Natal</option>
+                                        <option value="Eastern Cape">Eastern Cape</option>
+                                        <option value="Free State">Free State</option>
+                                        <option value="Limpopo">Limpopo</option>
+                                        <option value="Mpumalanga">Mpumalanga</option>
+                                        <option value="North West">North West</option>
+                                        <option value="Northern Cape">Northern Cape</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Postal Code *</label>
+                                    <input type="text" class="form-control" id="postalCode" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Parent/Guardian Information -->
+                        <div class="section mb-4">
+                            <h5 class="text-primary border-bottom pb-2">
+                                <i class="fas fa-users"></i> Parent/Guardian Information
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Parent/Guardian Full Name *</label>
+                                    <input type="text" class="form-control" id="guardianName" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Relationship *</label>
+                                    <select class="form-select" id="relationship" required>
+                                        <option value="">Select relationship...</option>
+                                        <option value="Mother">Mother</option>
+                                        <option value="Father">Father</option>
+                                        <option value="Guardian">Guardian</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Guardian Phone *</label>
+                                    <input type="tel" class="form-control" id="guardianPhone" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Guardian Email</label>
+                                    <input type="email" class="form-control" id="guardianEmail">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Previous School Information -->
+                        <div class="section mb-4">
+                            <h5 class="text-primary border-bottom pb-2">
+                                <i class="fas fa-school"></i> Previous School Information
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Previous School Name *</label>
+                                    <input type="text" class="form-control" id="previousSchool" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Grade/Year Completed *</label>
+                                    <select class="form-select" id="gradeCompleted" required>
+                                        <option value="">Select grade...</option>
+                                        <option value="Grade 7">Grade 7</option>
+                                        <option value="Grade 8">Grade 8</option>
+                                        <option value="Grade 9">Grade 9</option>
+                                        <option value="Grade 10">Grade 10</option>
+                                        <option value="Grade 11">Grade 11</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Reason for Transfer</label>
+                                    <textarea class="form-control" id="transferReason" rows="2" placeholder="Optional: Explain why you're changing schools"></textarea>
+                                    <button type="button" class="btn btn-link btn-sm p-0" onclick="askAI('Can you help me write a good reason for transferring schools?')">
+                                        <i class="fas fa-robot"></i> Get AI help
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Motivation Letter -->
+                        <div class="section mb-4">
+                            <h5 class="text-primary border-bottom pb-2">
+                                <i class="fas fa-pen"></i> Motivation Letter
+                            </h5>
+                            <div class="mb-3">
+                                <label class="form-label">Why do you want to attend this school? *</label>
+                                <textarea class="form-control" id="motivationLetter" rows="6" required 
+                                          placeholder="Write about your goals, interests, and why you want to attend this school..."></textarea>
+                                <div class="text-muted small mt-1">
+                                    <span id="charCount">0</span> characters (minimum 200 recommended)
+                                </div>
+                                <div class="mt-2">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="askAI('How do I write a good motivation letter for high school application?')">
+                                        <i class="fas fa-lightbulb"></i> Writing Tips
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-success" onclick="improveMotivation()">
+                                        <i class="fas fa-magic"></i> Improve My Writing
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Information -->
+                        <div class="section mb-4">
+                            <h5 class="text-primary border-bottom pb-2">
+                                <i class="fas fa-info-circle"></i> Additional Information
+                            </h5>
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Extracurricular Activities/Interests</label>
+                                    <textarea class="form-control" id="activities" rows="3" 
+                                              placeholder="Sports, music, clubs, hobbies, etc."></textarea>
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Special Needs or Accommodations</label>
+                                    <textarea class="form-control" id="specialNeeds" rows="2" 
+                                              placeholder="Any medical conditions, learning needs, or accommodations required"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex gap-2 justify-content-between">
+                            <button type="button" class="btn btn-secondary" onclick="saveProgress()">
+                                <i class="fas fa-save"></i> Save Progress
+                            </button>
+                            <div>
+                                <button type="button" class="btn btn-info" onclick="downloadForm()">
+                                    <i class="fas fa-download"></i> Download PDF
+                                </button>
+                                <button type="button" class="btn btn-success" onclick="submitToUpload()">
+                                    <i class="fas fa-upload"></i> Continue to Upload Documents
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Assistant (Right Side) -->
+        <div class="col-lg-4">
+            <div class="card shadow sticky-top" style="top: 20px;">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-robot"></i> AI Assistant
+                        <span class="badge bg-light text-success float-end">Free Helper</span>
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <!-- Chat Messages -->
+                    <div id="chatMessages" style="height: 400px; overflow-y: auto; padding: 15px; background: #f8f9fa;">
+                        <div class="alert alert-info">
+                            <strong>👋 Hello!</strong><br>
+                            I'm your AI assistant. I'm here to help you fill out this application form!
+                            <br><br>
+                            <strong>I can help with:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Explaining form fields</li>
+                                <li>Writing motivation letters</li>
+                                <li>Understanding terms</li>
+                                <li>Giving examples</li>
+                                <li>Improving your writing</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Help Buttons -->
+                    <div class="p-2 border-top bg-white">
+                        <small class="text-muted d-block mb-2">Quick Help:</small>
+                        <div class="d-flex flex-wrap gap-1">
+                            <button class="btn btn-sm btn-outline-primary" onclick="askAI('How do I write a good motivation letter?')">
+                                Motivation Tips
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary" onclick="askAI('What documents do I need?')">
+                                Documents Needed
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary" onclick="askAI('Give me an example of extracurricular activities')">
+                                Activity Examples
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Chat Input -->
+                    <div class="p-3 border-top">
+                        <div class="input-group">
+                            <input type="text" id="userQuestion" class="form-control" 
+                                   placeholder="Ask me anything..." 
+                                   onkeypress="if(event.key==='Enter') sendMessage()">
+                            <button class="btn btn-success" onclick="sendMessage()">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.chat-message {
+    margin-bottom: 15px;
+    animation: fadeIn 0.3s;
+}
+
+.chat-user {
+    background: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 18px 18px 5px 18px;
+    display: inline-block;
+    max-width: 80%;
+    margin-left: auto;
+    float: right;
+    clear: both;
+}
+
+.chat-ai {
+    background: white;
+    border: 1px solid #dee2e6;
+    padding: 10px 15px;
+    border-radius: 18px 18px 18px 5px;
+    display: inline-block;
+    max-width: 80%;
+    clear: both;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.typing-indicator {
+    background: white;
+    border: 1px solid #dee2e6;
+    padding: 10px 15px;
+    border-radius: 18px;
+    display: inline-block;
+}
+
+.typing-indicator span {
+    height: 8px;
+    width: 8px;
+    background: #90949c;
+    border-radius: 50%;
+    display: inline-block;
+    margin: 0 2px;
+    animation: typing 1.4s infinite;
+}
+
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-10px); }
+}
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+// Character counter for motivation letter
+document.getElementById('motivationLetter').addEventListener('input', function() {
+    document.getElementById('charCount').textContent = this.value.length;
+});
+
+// AI Response Database (Free, no API needed!)
+const aiResponses = {
+    'motivation': `Great question! Here's how to write a strong motivation letter:
+
+1. **Introduction** - Start with who you are and what grade you're applying for
+2. **Why This School** - Mention specific programs, teachers, or opportunities
+3. **Your Goals** - Share your academic and career aspirations
+4. **Your Strengths** - Highlight achievements, skills, and interests
+5. **Conclusion** - Express enthusiasm and gratitude
+
+**Example opening:**
+"My name is [Name], and I am applying for Grade 9 at [School Name]. I am excited about the opportunity to join your school because..."
+
+Keep it honest, personal, and positive!`,
+
+    'documents': `You'll typically need these documents:
+
+📄 **Required Documents:**
+1. Birth Certificate (certified copy)
+2. ID Document/Card
+3. Previous school report (most recent)
+4. Proof of residence (utility bill, lease agreement)
+5. Passport-size photos (2 recent)
+6. Immunization records (sometimes)
+
+💡 **Tips:**
+- Make clear copies
+- Certify at police station if needed
+- Keep originals safe
+- Scan and save digital copies`,
+
+    'id number': `An ID Number is your South African Identity Number.
+
+**Format:** 13 digits (YYMMDDGSSSCAZ)
+- First 6: Date of birth (YYMMDD)
+- Next 4: Gender and sequence
+- Next 2: Citizenship
+- Last 1: Check digit
+
+**Example:** 0512051234089
+
+If you don't have an ID yet, you can use your birth certificate number.`,
+
+    'activities': `Great extracurricular activities to mention:
+
+🎨 **Arts & Culture:**
+- Drama/Theatre
+- Music (instrument, choir)
+- Art/Drawing
+- Dance
+
+⚽ **Sports:**
+- Soccer, rugby, netball
+- Athletics, swimming
+- Martial arts
+- Chess
+
+📚 **Academics:**
+- Debate club
+- Science club
+- Mathematics olympiad
+- Reading club
+
+🤝 **Community:**
+- Volunteering
+- Youth groups
+- Environmental projects
+- Tutoring younger students
+
+Be specific about your role and achievements!`,
+
+    'transfer': `Good reasons for school transfer:
+
+✅ **Acceptable reasons:**
+- Family relocation
+- Better academic opportunities
+- Specific programs/sports offered
+- Closer to home
+- Specialized curriculum
+
+**How to write it:**
+"I am transferring because [specific reason]. I believe [new school name] offers [specific benefit] that will help me achieve [your goal]."
+
+Keep it positive and future-focused!`,
+
+    'help': `I can help you with:
+
+🎓 **Application Form:**
+- Explaining any field
+- Providing examples
+- Understanding terms
+
+✍️ **Writing:**
+- Motivation letter tips
+- Improving your writing
+- Grammar and structure
+
+📝 **General:**
+- Document requirements
+- What to expect
+- Best practices
+
+Just ask me anything!`
+};
+
+function sendMessage() {
+    const input = document.getElementById('userQuestion');
+    const question = input.value.trim();
+    
+    if (!question) return;
+    
+    // Add user message
+    addMessage(question, 'user');
+    input.value = '';
+    
+    // Show typing indicator
+    showTyping();
+    
+    // Get AI response after delay
+    setTimeout(() => {
+        const response = getAIResponse(question);
+        removeTyping();
+        addMessage(response, 'ai');
+    }, 1000);
+}
+
+function askAI(question) {
+    document.getElementById('userQuestion').value = question;
+    sendMessage();
+}
+
+function addMessage(text, type) {
+    const chatDiv = document.getElementById('chatMessages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'chat-message';
+    
+    const bubble = document.createElement('div');
+    bubble.className = type === 'user' ? 'chat-user' : 'chat-ai';
+    bubble.innerHTML = text.replace(/\n/g, '<br>');
+    
+    messageDiv.appendChild(bubble);
+    chatDiv.appendChild(messageDiv);
+    
+    // Clear float
+    const clearDiv = document.createElement('div');
+    clearDiv.style.clear = 'both';
+    chatDiv.appendChild(clearDiv);
+    
+    // Scroll to bottom
+    chatDiv.scrollTop = chatDiv.scrollHeight;
+}
+
+function showTyping() {
+    const chatDiv = document.getElementById('chatMessages');
+    const typingDiv = document.createElement('div');
+    typingDiv.id = 'typingIndicator';
+    typingDiv.className = 'typing-indicator';
+    typingDiv.innerHTML = '<span></span><span></span><span></span>';
+    chatDiv.appendChild(typingDiv);
+    chatDiv.scrollTop = chatDiv.scrollHeight;
+}
+
+function removeTyping() {
+    const typing = document.getElementById('typingIndicator');
+    if (typing) typing.remove();
+}
+
+function getAIResponse(question) {
+    const q = question.toLowerCase();
+    
+    // Match keywords to responses
+    if (q.includes('motivation') || q.includes('letter') || q.includes('write')) {
+        return aiResponses.motivation;
+    } else if (q.includes('document') || q.includes('need') || q.includes('require')) {
+        return aiResponses.documents;
+    } else if (q.includes('id number') || q.includes('identity')) {
+        return aiResponses['id number'];
+    } else if (q.includes('activit') || q.includes('sport') || q.includes('hobby') || q.includes('extra')) {
+        return aiResponses.activities;
+    } else if (q.includes('transfer') || q.includes('change') || q.includes('reason')) {
+        return aiResponses.transfer;
+    } else if (q.includes('full name')) {
+        return `Your Full Name should match your birth certificate or ID document exactly.\n\nFormat: First Name Middle Name(s) Last Name\n\nExample: Thabo Johannes Mokoena\n\nMake sure the spelling is correct!`;
+    } else if (q.includes('suburb') || q.includes('address')) {
+        return `Your residential address is where you currently live.\n\n📍 Include:\n- Street address (e.g., 123 Main Street)\n- Suburb/Township name\n- City\n- Province\n- Postal code\n\nThis must match your proof of residence document!`;
+    } else if (q.includes('improve') || q.includes('better')) {
+        return `To improve your motivation letter:\n\n✨ **Tips:**\n1. Be specific about why THIS school\n2. Mention your achievements\n3. Show enthusiasm\n4. Connect your goals to the school\n5. Use proper grammar\n6. Keep it 200-500 words\n7. Be honest and authentic\n\nWant me to review your draft? Just paste it!`;
+    } else {
+        return aiResponses.help;
+    }
+}
+
+function improveMotivation() {
+    const motivation = document.getElementById('motivationLetter').value;
+    
+    if (!motivation || motivation.length < 50) {
+        addMessage("Please write your motivation letter first, then I can help you improve it!", 'ai');
+        return;
+    }
+    
+    const feedback = `I've reviewed your motivation letter! Here are some tips:\n\n✅ **Strengths:** Your letter shows enthusiasm!\n\n💡 **Suggestions:**\n1. Add specific examples of your achievements\n2. Mention why THIS particular school interests you\n3. Include your future goals\n4. Check spelling and grammar\n5. Make it more personal and unique\n\n**Length:** ${motivation.length} characters (${motivation.length < 200 ? 'add more details' : 'good length'})\n\nWould you like help with any specific part?`;
+    
+    addMessage("Can you review my motivation letter?", 'user');
+    showTyping();
+    setTimeout(() => {
+        removeTyping();
+        addMessage(feedback, 'ai');
+    }, 1500);
+}
+
+function saveProgress() {
+    const formData = {
+        fullName: document.getElementById('fullName').value,
+        idNumber: document.getElementById('idNumber').value,
+        dob: document.getElementById('dob').value,
+        gender: document.getElementById('gender').value,
+        phone: document.getElementById('phone').value,
+        email: document.getElementById('email').value,
+        streetAddress: document.getElementById('streetAddress').value,
+        suburb: document.getElementById('suburb').value,
+        city: document.getElementById('city').value,
+        province: document.getElementById('province').value,
+        postalCode: document.getElementById('postalCode').value,
+        guardianName: document.getElementById('guardianName').value,
+        relationship: document.getElementById('relationship').value,
+        guardianPhone: document.getElementById('guardianPhone').value,
+        guardianEmail: document.getElementById('guardianEmail').value,
+        previousSchool: document.getElementById('previousSchool').value,
+        gradeCompleted: document.getElementById('gradeCompleted').value,
+        transferReason: document.getElementById('transferReason').value,
+        motivationLetter: document.getElementById('motivationLetter').value,
+        activities: document.getElementById('activities').value,
+        specialNeeds: document.getElementById('specialNeeds').value
+    };
+    
+    localStorage.setItem('applicationFormData', JSON.stringify(formData));
+    alert('✅ Progress saved! You can come back later to continue.');
+}
+
+function loadProgress() {
+    const saved = localStorage.getItem('applicationFormData');
+    if (saved) {
+        const data = JSON.parse(saved);
+        Object.keys(data).forEach(key => {
+            const element = document.getElementById(key);
+            if (element) element.value = data[key];
+        });
+    }
+}
+
+function downloadForm() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    // Title
+    doc.setFontSize(18);
+    doc.setTextColor(0, 123, 255);
+    doc.text('School Application Form', 105, 20, { align: 'center' });
+    
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    let y = 35;
+    
+    // Helper function to add section
+    function addSection(title, fields) {
+        doc.setFontSize(12);
+        doc.setTextColor(0, 123, 255);
+        doc.text(title, 20, y);
+        y += 7;
+        doc.setFontSize(10);
+        doc.setTextColor(0, 0, 0);
+        
+        fields.forEach(field => {
+            const value = document.getElementById(field.id)?.value || 'Not provided';
+            doc.text(`${field.label}: ${value}`, 25, y);
+            y += 6;
+            
+            if (y > 270) {
+                doc.addPage();
+                y = 20;
+            }
+        });
+        y += 5;
+    }
+    
+    // Personal Information
+    addSection('Personal Information', [
+        { id: 'fullName', label: 'Full Name' },
+        { id: 'idNumber', label: 'ID Number' },
+        { id: 'dob', label: 'Date of Birth' },
+        { id: 'gender', label: 'Gender' },
+        { id: 'phone', label: 'Phone' },
+        { id: 'email', label: 'Email' }
+    ]);
+    
+    // Address
+    addSection('Residential Address', [
+        { id: 'streetAddress', label: 'Street Address' },
+        { id: 'suburb', label: 'Suburb' },
+        { id: 'city', label: 'City' },
+        { id: 'province', label: 'Province' },
+        { id: 'postalCode', label: 'Postal Code' }
+    ]);
+    
+    // Guardian
+    addSection('Parent/Guardian Information', [
+        { id: 'guardianName', label: 'Guardian Name' },
+        { id: 'relationship', label: 'Relationship' },
+        { id: 'guardianPhone', label: 'Guardian Phone' },
+        { id: 'guardianEmail', label: 'Guardian Email' }
+    ]);
+    
+    // Previous School
+    addSection('Previous School', [
+        { id: 'previousSchool', label: 'School Name' },
+        { id: 'gradeCompleted', label: 'Grade Completed' },
+        { id: 'transferReason', label: 'Transfer Reason' }
+    ]);
+    
+    // Motivation Letter
+    doc.setFontSize(12);
+    doc.setTextColor(0, 123, 255);
+    doc.text('Motivation Letter', 20, y);
+    y += 7;
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    
+    const motivation = document.getElementById('motivationLetter').value || 'Not provided';
+    const splitMotivation = doc.splitTextToSize(motivation, 170);
+    doc.text(splitMotivation, 25, y);
+    
+    // Save
+    doc.save('School_Application_Form.pdf');
+    alert('📄 PDF downloaded! You can print and upload this with your other documents.');
+}
+
+function submitToUpload() {
+    if (!confirm('Have you filled all required fields? You will be redirected to upload supporting documents.')) {
+        return;
+    }
+    
+    saveProgress();
+    // Redirect to schools page or upload page
+    window.location.href = '{{ url_for("schools") }}';
+}
+
+// Load saved progress on page load
+window.onload = function() {
+    loadProgress();
+};
+</script>
+{% endblock %}

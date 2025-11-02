@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - ZebEduApplication{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4"><i class="fas fa-user-circle"></i> My Profile</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Profile Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow text-center">
+                <div class="card-body">
+                    {% if current_user.profile_photo %}
+                        <img src="{{ url_for('static', filename=current_user.profile_photo) }}" 
+                             class="rounded-circle mb-3" width="150" height="150" alt="Profile Photo">
+                    {% else %}
+                        <i class="fas fa-user-circle fa-8x text-muted mb-3"></i>
+                    {% endif %}
+                    <h4>{{ current_user.full_name }}</h4>
+                    <p class="text-muted">@{{ current_user.username }}</p>
+                    <span class="badge bg-primary">{{ current_user.role|title }}</span>
+                    <hr>
+                    <p><small class="text-muted">Member since {{ current_user.created_at.strftime('%B %Y') }}</small></p>
+                </div>
+            </div>
+
+            <!-- Quick Stats (for students) -->
+            {% if current_user.role == 'student' %}
+            <div class="card shadow mt-3">
+                <div class="card-body">
+                    <h5 class="card-title">Quick Stats</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><i class="fas fa-file-alt"></i> Total Applications</span>
+                            <span class="badge bg-primary">{{ current_user.applications|length }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><i class="fas fa-check-circle"></i> Approved</span>
+                            <span class="badge bg-success">{{ current_user.applications|selectattr('status', 'equalto', 'approved')|list|length }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><i class="fas fa-clock"></i> Pending</span>
+                            <span class="badge bg-warning">{{ current_user.applications|selectattr('status', 'equalto', 'pending')|list|length }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Profile Form -->
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-edit"></i> Edit Profile</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <ul class="nav nav-tabs mb-4" id="profileTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="personal-tab" data-bs-toggle="tab" data-bs-target="#personal" type="button">
+                                    <i class="fas fa-user"></i> Personal Info
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button">
+                                    <i class="fas fa-cog"></i> Settings
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button">
+                                    <i class="fas fa-lock"></i> Security
+                                </button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content" id="profileTabContent">
+                            <!-- Personal Info Tab -->
+                            <div class="tab-pane fade show active" id="personal" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Full Name *</label>
+                                        <input type="text" class="form-control" name="full_name" value="{{ current_user.full_name }}" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Username</label>
+                                        <input type="text" class="form-control" value="{{ current_user.username }}" disabled>
+                                        <small class="text-muted">Username cannot be changed</small>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Email *</label>
+                                        <input type="email" class="form-control" name="email" value="{{ current_user.email }}" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Phone Number</label>
+                                        <input type="tel" class="form-control" name="phone_number" value="{{ current_user.phone_number or '' }}">
+                                    </div>
+                                </div>
+
+                                {% if current_user.role == 'student' %}
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">ID Number</label>
+                                        <input type="text" class="form-control" value="{{ current_user.id_number or '' }}" disabled>
+                                        <small class="text-muted">ID number cannot be changed</small>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Current School</label>
+                                        <input type="text" class="form-control" name="current_school" value="{{ current_user.current_school or '' }}">
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <div class="mb-3">
+                                    <label class="form-label">Profile Photo</label>
+                                    <input type="file" class="form-control" name="profile_photo" accept="image/*">
+                                    <small class="text-muted">Upload a profile picture (JPG, PNG - Max 5MB)</small>
+                                </div>
+                            </div>
+
+                            <!-- Settings Tab -->
+                            <div class="tab-pane fade" id="settings" role="tabpanel">
+                                <h5 class="mb-3"><i class="fas fa-bell"></i> Notification Preferences</h5>
+                                
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="emailNotif" name="email_notifications" 
+                                           {% if current_user.email_notifications %}checked{% endif %}>
+                                    <label class="form-check-label" for="emailNotif">
+                                        <i class="fas fa-envelope"></i> Email Notifications
+                                        <br><small class="text-muted">Receive email updates about your applications</small>
+                                    </label>
+                                </div>
+
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="smsNotif" name="sms_notifications"
+                                           {% if current_user.sms_notifications %}checked{% endif %}>
+                                    <label class="form-check-label" for="smsNotif">
+                                        <i class="fas fa-sms"></i> SMS Notifications
+                                        <br><small class="text-muted">Receive text message updates (SMS charges may apply)</small>
+                                    </label>
+                                </div>
+
+                                <hr>
+
+                                <h5 class="mb-3"><i class="fas fa-eye"></i> Privacy Settings</h5>
+                                
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i> Your personal information is kept secure and private. 
+                                    Only administrators can view your application details.
+                                </div>
+                            </div>
+
+                            <!-- Security Tab -->
+                            <div class="tab-pane fade" id="security" role="tabpanel">
+                                <h5 class="mb-3"><i class="fas fa-key"></i> Change Password</h5>
+                                
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle"></i> To change your password, please use the 
+                                    <a href="{{ url_for('forgot_password') }}" class="alert-link">Forgot Password</a> feature.
+                                </div>
+
+                                <hr>
+
+                                <h5 class="mb-3"><i class="fas fa-shield-alt"></i> Account Security</h5>
+                                
+                                <ul class="list-group">
+                                    <li class="list-group-item">
+                                        <i class="fas fa-check-circle text-success"></i> Account is active and secure
+                                    </li>
+                                    <li class="list-group-item">
+                                        <i class="fas fa-clock text-muted"></i> Last login: <strong>{{ current_user.created_at.strftime('%Y-%m-%d %H:%M') }}</strong>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
