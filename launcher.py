@@ -23,12 +23,12 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(me
 def is_port_in_use(port: int) -> bool:
     """Check if a given TCP port is already in use."""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        return s.connect_ex(('127.0.0.1', port)) == 0
+        return s.connect_ex(('0.0.0.0', port)) == 0
 
 
 def run_flask():
     """Run the Flask server in a background thread."""
-    app.run(host='127.0.0.1', port=5000, debug=False, use_reloader=False)
+    app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False)
 
 
 def safe_print(*args, **kwargs):
@@ -70,7 +70,7 @@ def main():
     # Create a desktop window for the Flask app
     window = webview.create_window(
         title="ZebEdu Application",
-        url="http://127.0.0.1:5000",
+        url="http://0.0.0.0:5000",
         width=1200,
         height=800,
         resizable=True,
