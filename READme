@@ -1,4 +1,5 @@
-# ZebEduApplication 🎓
+# ZebEduApplication 🎓   WIL PROJECT 
+
 
 A web application designed to help South African primary students find and apply to high schools based on location and school performance.
 
@@ -13,7 +14,7 @@ A web application designed to help South African primary students find and apply
 
 ## Technology Stack 💻
 
-- **Backend**: Python Flask
+- **Backend**: Python Flask (Still learning how to use it ) 
 - **Database**: SQLite
 - **Frontend**: HTML5, CSS3, JavaScript, Bootstrap 5
 - **Authentication**: Flask-Login
