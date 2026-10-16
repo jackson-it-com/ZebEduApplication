@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Rejected Students - ZebEduApplication{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-4" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-white">
+                            <h2 class="mb-2 text-white">
+                                <i class="fas fa-times-circle"></i> Rejected Students
+                            </h2>
+                            <p class="mb-0">
+                                <i class="fas fa-list"></i> Total Rejected: <strong>{{ applications|length }}</strong>
+                            </p>
+                        </div>
+                        <div>
+                            <a href="{{ url_for('download_rejected_pdf') }}" class="btn btn-light btn-lg" target="_blank">
+                                <i class="fas fa-download"></i> Download PDF
+                            </a>
+                            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-light btn-lg">
+                                <i class="fas fa-arrow-left"></i> Back to Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Applications Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="fas fa-users-slash"></i> Rejected Students List</h4>
+                </div>
+                <div class="card-body">
+                    {% if applications %}
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <thead class="table-danger">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Student Name</th>
+                                        <th>ID Number</th>
+                                        <th>School</th>
+                                        <th>Grade</th>
+                                        <th>Applied Date</th>
+                                        <th>Rejected Date</th>
+                                        <th>Reviewed By</th>
+                                        <th>Rejection Reason</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for app in applications %}
+                                    <tr>
+                                        <td>{{ loop.index }}</td>
+                                        <td>
+                                            <strong>{{ app.student.full_name }}</strong>
+                                        </td>
+                                        <td>{{ app.student.id_number }}</td>
+                                        <td>{{ app.school.name }}</td>
+                                        <td>
+                                            <span class="badge bg-info">Grade {{ app.grade }}</span>
+                                        </td>
+                                        <td>{{ app.applied_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>
+                                            {% if app.reviewed_at %}
+                                                {{ app.reviewed_at.strftime('%Y-%m-%d %H:%M') }}
+                                            {% else %}
+                                                <span class="text-muted">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if app.reviewed_by %}
+                                                {{ app.reviewed_by.username }}
+                                            {% else %}
+                                                <span class="text-muted">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if app.admin_notes %}
+                                                <button class="btn btn-sm btn-outline-secondary" 
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#reasonModal{{ app.id }}">
+                                                    <i class="fas fa-comment-alt"></i> View Reason
+                                                </button>
+                                            {% else %}
+                                                <span class="text-muted">No reason provided</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('view_application', app_id=app.id) }}" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                            <button class="btn btn-sm btn-warning" onclick="undoReview({{ app.id }})">
+                                                <i class="fas fa-undo"></i> Undo
+                                            </button>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Rejection Reason Modal -->
+                                    {% if app.admin_notes %}
+                                    <div class="modal fade" id="reasonModal{{ app.id }}" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-danger text-white">
+                                                    <h5 class="modal-title">
+                                                        <i class="fas fa-comment-alt"></i> Rejection Reason
+                                                    </h5>
+                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p><strong>Student:</strong> {{ app.student.full_name }}</p>
+                                                    <p><strong>School:</strong> {{ app.school.name }}</p>
+                                                    <hr>
+                                                    <p><strong>Reason for Rejection:</strong></p>
+                                                    <p class="text-muted">{{ app.admin_notes }}</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No Rejected Students Yet</h5>
+                            <p class="text-muted">Students who have been rejected will appear here.</p>
+                            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary mt-3">
+                                <i class="fas fa-arrow-left"></i> Go to Dashboard
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function undoReview(appId) {
+    if (!confirm('Are you sure you want to reset this application back to pending?')) {
+        return;
+    }
+    
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/admin/applications/' + appId + '/review';
+
+    const statusInput = document.createElement('input');
+    statusInput.type = 'hidden';
+    statusInput.name = 'status';
+    statusInput.value = 'pending';
+    form.appendChild(statusInput);
+
+    const notesInput = document.createElement('input');
+    notesInput.type = 'hidden';
+    notesInput.name = 'admin_notes';
+    notesInput.value = 'Status reset to pending from rejected list';
+    form.appendChild(notesInput);
+
+    // Add CSRF token if needed
+    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+    if (csrfToken) {
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrf_token';
+        csrfInput.value = csrfToken.content;
+        form.appendChild(csrfInput);
+    }
+
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
+{% endblock %}

@@ -103,11 +103,11 @@
                     <!-- Uploaded Documents -->
                     <h5><i class="fas fa-paperclip"></i> Uploaded Documents</h5>
 
-                    <!-- Missing Documents Alert (Admin Only) -->
+                    <!-- Missing Documents Alert -->
                     {% if current_user.role == 'admin' %}
                         {% set missing_docs = [] %}
                         {% if not application.previous_report %}{% set _ = missing_docs.append('Previous Report') %}{% endif %}
-                        {% if not application.birth_certificate %}{% set _ = missing_docs.append('Birth Certificate/id/passport') %}{% endif %}
+                        {% if not application.birth_certificate %}{% set _ = missing_docs.append('Birth Certificate/ID/Passport') %}{% endif %}
                         {% if not application.proof_of_residence %}{% set _ = missing_docs.append('Proof of Residence') %}{% endif %}
                         {% if not application.id_document %}{% set _ = missing_docs.append('ID Document') %}{% endif %}
                         
@@ -127,10 +127,17 @@
                         {% endif %}
                     {% endif %}
 
+                    <!-- Student Document Replacement Info -->
+                    {% if current_user.role == 'student' and application.status == 'pending' %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> You can replace any document if you uploaded the wrong file. Click the "Replace" button next to each document.
+                        </div>
+                    {% endif %}
+
                     <div class="row">
                         <!-- Previous Report -->
                         <div class="col-md-6 mb-3">
-                            <div class="card">
+                            <div class="card h-100">
                                 <div class="card-body">
                                     <h6 class="card-title">
                                         <i class="fas fa-file-pdf text-danger"></i> Previous School Report
@@ -139,14 +146,28 @@
                                         <p class="text-success mb-2">
                                             <i class="fas fa-check-circle"></i> Uploaded
                                         </p>
-                                        <a href="{{ url_for('static', filename=application.previous_report) }}" 
-                                           class="btn btn-sm btn-info" target="_blank">
-                                            <i class="fas fa-eye"></i> View
-                                        </a>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('static', filename=application.previous_report) }}" 
+                                               class="btn btn-sm btn-info" target="_blank">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                            {% if current_user.role == 'student' and application.status == 'pending' %}
+                                                <button class="btn btn-sm btn-warning" 
+                                                        onclick="openReplaceModal('previous_report', 'Previous School Report')">
+                                                    <i class="fas fa-sync-alt"></i> Replace
+                                                </button>
+                                            {% endif %}
+                                        </div>
                                     {% else %}
-                                        <p class="text-muted mb-0">
+                                        <p class="text-muted mb-2">
                                             <i class="fas fa-times-circle"></i> Not uploaded
                                         </p>
+                                        {% if current_user.role == 'student' and application.status == 'pending' %}
+                                            <button class="btn btn-sm btn-primary" 
+                                                    onclick="openReplaceModal('previous_report', 'Previous School Report')">
+                                                <i class="fas fa-upload"></i> Upload
+                                            </button>
+                                        {% endif %}
                                     {% endif %}
                                 </div>
                             </div>
@@ -154,23 +175,37 @@
 
                         <!-- Birth Certificate -->
                         <div class="col-md-6 mb-3">
-                            <div class="card">
+                            <div class="card h-100">
                                 <div class="card-body">
                                     <h6 class="card-title">
-                                        <i class="fas fa-certificate text-primary"></i> Birth Certificate or ID or Passport
+                                        <i class="fas fa-certificate text-primary"></i> Birth Certificate/ID/Passport
                                     </h6>
                                     {% if application.birth_certificate %}
                                         <p class="text-success mb-2">
                                             <i class="fas fa-check-circle"></i> Uploaded
                                         </p>
-                                        <a href="{{ url_for('static', filename=application.birth_certificate) }}" 
-                                           class="btn btn-sm btn-info" target="_blank">
-                                            <i class="fas fa-eye"></i> View
-                                        </a>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('static', filename=application.birth_certificate) }}" 
+                                               class="btn btn-sm btn-info" target="_blank">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                            {% if current_user.role == 'student' and application.status == 'pending' %}
+                                                <button class="btn btn-sm btn-warning" 
+                                                        onclick="openReplaceModal('birth_certificate', 'Birth Certificate/ID/Passport')">
+                                                    <i class="fas fa-sync-alt"></i> Replace
+                                                </button>
+                                            {% endif %}
+                                        </div>
                                     {% else %}
-                                        <p class="text-muted mb-0">
+                                        <p class="text-muted mb-2">
                                             <i class="fas fa-times-circle"></i> Not uploaded
                                         </p>
+                                        {% if current_user.role == 'student' and application.status == 'pending' %}
+                                            <button class="btn btn-sm btn-primary" 
+                                                    onclick="openReplaceModal('birth_certificate', 'Birth Certificate/ID/Passport')">
+                                                <i class="fas fa-upload"></i> Upload
+                                            </button>
+                                        {% endif %}
                                     {% endif %}
                                 </div>
                             </div>
@@ -178,7 +213,7 @@
 
                         <!-- Proof of Residence -->
                         <div class="col-md-6 mb-3">
-                            <div class="card">
+                            <div class="card h-100">
                                 <div class="card-body">
                                     <h6 class="card-title">
                                         <i class="fas fa-home text-success"></i> Proof of Residence
@@ -187,14 +222,28 @@
                                         <p class="text-success mb-2">
                                             <i class="fas fa-check-circle"></i> Uploaded
                                         </p>
-                                        <a href="{{ url_for('static', filename=application.proof_of_residence) }}" 
-                                           class="btn btn-sm btn-info" target="_blank">
-                                            <i class="fas fa-eye"></i> View
-                                        </a>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('static', filename=application.proof_of_residence) }}" 
+                                               class="btn btn-sm btn-info" target="_blank">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                            {% if current_user.role == 'student' and application.status == 'pending' %}
+                                                <button class="btn btn-sm btn-warning" 
+                                                        onclick="openReplaceModal('proof_of_residence', 'Proof of Residence')">
+                                                    <i class="fas fa-sync-alt"></i> Replace
+                                                </button>
+                                            {% endif %}
+                                        </div>
                                     {% else %}
-                                        <p class="text-muted mb-0">
+                                        <p class="text-muted mb-2">
                                             <i class="fas fa-times-circle"></i> Not uploaded
                                         </p>
+                                        {% if current_user.role == 'student' and application.status == 'pending' %}
+                                            <button class="btn btn-sm btn-primary" 
+                                                    onclick="openReplaceModal('proof_of_residence', 'Proof of Residence')">
+                                                <i class="fas fa-upload"></i> Upload
+                                            </button>
+                                        {% endif %}
                                     {% endif %}
                                 </div>
                             </div>
@@ -202,44 +251,71 @@
 
                         <!-- ID Document -->
                         <div class="col-md-6 mb-3">
-                            <div class="card">
+                            <div class="card h-100">
                                 <div class="card-body">
                                     <h6 class="card-title">
-                                        <i class="fas fa-id-card text-info"></i> Form 
+                                        <i class="fas fa-id-card text-info"></i> Form
                                     </h6>
                                     {% if application.id_document %}
                                         <p class="text-success mb-2">
                                             <i class="fas fa-check-circle"></i> Uploaded
                                         </p>
-                                        <a href="{{ url_for('static', filename=application.id_document) }}" 
-                                           class="btn btn-sm btn-info" target="_blank">
-                                            <i class="fas fa-eye"></i> View
-                                        </a>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('static', filename=application.id_document) }}" 
+                                               class="btn btn-sm btn-info" target="_blank">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                            {% if current_user.role == 'student' and application.status == 'pending' %}
+                                                <button class="btn btn-sm btn-warning" 
+                                                        onclick="openReplaceModal('id_document', 'Form')">
+                                                    <i class="fas fa-sync-alt"></i> Replace
+                                                </button>
+                                            {% endif %}
+                                        </div>
                                     {% else %}
-                                        <p class="text-muted mb-0">
+                                        <p class="text-muted mb-2">
                                             <i class="fas fa-times-circle"></i> Not uploaded
                                         </p>
+                                        {% if current_user.role == 'student' and application.status == 'pending' %}
+                                            <button class="btn btn-sm btn-primary" 
+                                                    onclick="openReplaceModal('id_document', 'Form')">
+                                                <i class="fas fa-upload"></i> Upload
+                                            </button>
+                                        {% endif %}
                                     {% endif %}
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {% if current_user.role == 'admin' and application.admin_notes %}
+                    <!-- ADMIN NOTES SECTION - VISIBLE TO BOTH ADMIN AND STUDENT -->
+                    <!-- This section will remain visible until admin updates/removes the notes -->
+                    {% if application.admin_notes %}
                         <hr>
-                        <h5><i class="fas fa-sticky-note"></i> Admin Notes</h5>
-                        <div class="alert alert-info">
-                            {{ application.admin_notes }}
-                        </div>
-                    {% endif %}
-
-                    {% if application.admin_notes and current_user.role == 'student' %}
-                        <hr>
-                        <h5>
-                            <i class="fas fa-info-circle"></i> Review Notes
-                        </h5>
-                        <div class="alert {% if application.status == 'rejected' %}alert-danger{% else %}alert-info{% endif %}">
-                            {{ application.admin_notes }}
+                        <div class="card border-primary shadow-sm admin-notes-section">
+                            <div class="card-header {% if application.status == 'rejected' %}bg-danger{% elif application.status == 'approved' %}bg-success{% else %}bg-info{% endif %} text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-comment-dots"></i> 
+                                    {% if current_user.role == 'student' %}
+                                        Review Notes from Admin
+                                    {% else %}
+                                        Admin Notes
+                                    {% endif %}
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert {% if application.status == 'rejected' %}alert-danger{% elif application.status == 'approved' %}alert-success{% else %}alert-info{% endif %} mb-0 admin-notes-content" 
+                                     style="white-space: pre-wrap; font-size: 1.05rem; line-height: 1.6;">
+                                    {{ application.admin_notes }}
+                                </div>
+                                {% if application.reviewed_at %}
+                                <div class="mt-3">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> Reviewed on: {{ application.reviewed_at.strftime('%B %d, %Y at %H:%M') }}
+                                    </small>
+                                </div>
+                                {% endif %}
+                            </div>
                         </div>
                     {% endif %}
                 </div>
@@ -304,15 +380,15 @@
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Admin Notes</label>
-                            <textarea class="form-control" name="admin_notes" rows="3" placeholder="Add notes about this decision..."></textarea>
+                            <label class="form-label">Admin Notes *</label>
+                            <textarea class="form-control" name="admin_notes" rows="4" placeholder="Add notes that will be visible to the student..." required></textarea>
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle"></i> These notes will be visible to the student
+                            </small>
                         </div>
-                        <div class="d-grid gap-2">
+                        <div class="d-grid">
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-check"></i> Submit Decision
-                            </button>
-                            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#messageModal">
-                                <i class="fas fa-envelope"></i> Message Student
                             </button>
                         </div>
                     </form>
@@ -320,35 +396,68 @@
             </div>
             {% endif %}
 
-            <!-- Student Actions - Cancel Button -->
-            {% if current_user.role == 'student' and application.status == 'pending' %}
+            <!-- Admin Messaging Card (Only for admins to message students) -->
+            {% if current_user.role == 'admin' %}
             <div class="card shadow mb-4">
-                <div class="card-header bg-danger text-white">
-                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Cancel Application</h5>
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-envelope"></i> Message Student</h5>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted">If you wish to cancel this application, click the button below.</p>
-                    <button class="btn btn-danger w-100" onclick="cancelApplication({{ application.id }}, '{{ application.school.name }}')">
-                        <i class="fas fa-times-circle"></i> Cancel Application
-                    </button>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Student Contact Card -->
-            {% if current_user.role == 'student' %}
-            <div class="card shadow">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="fas fa-envelope"></i> Contact</h5>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted">Need help with your application?</p>
+                    <p class="text-muted">Send a message to {{ application.student.full_name }}</p>
                     <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#messageModal">
-                        <i class="fas fa-envelope"></i> Message Admin
+                        <i class="fas fa-paper-plane"></i> Send Message
                     </button>
                 </div>
             </div>
             {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Replace Document Modal -->
+<div class="modal fade" id="replaceDocumentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">
+                    <i class="fas fa-sync-alt"></i> <span id="modalTitle">Replace Document</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('replace_document', app_id=application.id) }}" enctype="multipart/form-data" id="replaceDocumentForm">
+                <div class="modal-body">
+                    <input type="hidden" name="document_type" id="documentType">
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> 
+                        <strong>Note:</strong> The new file will replace the existing document. The old file will be permanently removed.
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Document:</strong> <span id="documentName"></span></label>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="documentFile" class="form-label">Select New File *</label>
+                        <input type="file" class="form-control" id="documentFile" name="document" accept=".pdf,.jpg,.jpeg,.png" required>
+                        <small class="text-muted">Accepted formats: PDF, JPG, PNG (Max 5MB)</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="replaceReason" class="form-label">Reason for Replacement (Optional)</label>
+                        <textarea class="form-control" id="replaceReason" name="reason" rows="3" 
+                                  placeholder="E.g., Uploaded wrong file, Better quality document available..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-upload"></i> Upload New Document
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -424,17 +533,80 @@
 </div>
 
 <script>
-function cancelApplication(appId, schoolName) {
-    // Set the school name in the modal
-    document.getElementById('cancelSchoolName').textContent = schoolName;
+// Open the replace document modal with appropriate information
+function openReplaceModal(docType, docName) {
+    document.getElementById('documentType').value = docType;
+    document.getElementById('documentName').textContent = docName;
+    document.getElementById('modalTitle').textContent = 'Replace ' + docName;
     
-    // Set the form action
-    document.getElementById('cancelForm').action = '/application/' + appId + '/cancel';
+    // Reset the file input and reason
+    document.getElementById('documentFile').value = '';
+    document.getElementById('replaceReason').value = '';
     
     // Show the modal
+    const modal = new bootstrap.Modal(document.getElementById('replaceDocumentModal'));
+    modal.show();
+}
+
+// Validate file size before submission
+document.getElementById('replaceDocumentForm').addEventListener('submit', function(e) {
+    const fileInput = document.getElementById('documentFile');
+    const file = fileInput.files[0];
+    
+    if (file) {
+        // Check file size (5MB = 5 * 1024 * 1024 bytes)
+        const maxSize = 5 * 1024 * 1024;
+        if (file.size > maxSize) {
+            e.preventDefault();
+            alert('File size must not exceed 5MB. Please choose a smaller file.');
+            return false;
+        }
+        
+        // Check file type
+        const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+        if (!allowedTypes.includes(file.type)) {
+            e.preventDefault();
+            alert('Only PDF, JPG, and PNG files are allowed.');
+            return false;
+        }
+    }
+});
+
+function cancelApplication(appId, schoolName) {
+    document.getElementById('cancelSchoolName').textContent = schoolName;
+    document.getElementById('cancelForm').action = '/application/' + appId + '/cancel';
     const modal = new bootstrap.Modal(document.getElementById('cancelModal'));
     modal.show();
 }
+
+// Ensure admin notes remain visible on page load and don't get hidden
+document.addEventListener('DOMContentLoaded', function() {
+    // Force admin notes to be visible
+    const adminNotesSection = document.querySelector('.admin-notes-section');
+    if (adminNotesSection) {
+        adminNotesSection.style.display = 'block';
+        adminNotesSection.style.opacity = '1';
+        adminNotesSection.style.visibility = 'visible';
+        
+        // Prevent any scripts from hiding it
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (adminNotesSection.style.display === 'none' || 
+                    adminNotesSection.style.opacity === '0' ||
+                    adminNotesSection.style.visibility === 'hidden') {
+                    adminNotesSection.style.display = 'block';
+                    adminNotesSection.style.opacity = '1';
+                    adminNotesSection.style.visibility = 'visible';
+                }
+            });
+        });
+        
+        observer.observe(adminNotesSection, {
+            attributes: true,
+            attributeFilter: ['style', 'class']
+        });
+    }
+});
 </script>
 
 <style>
@@ -450,6 +622,40 @@ function cancelApplication(appId, schoolName) {
     position: absolute;
     left: 0;
     top: 0;
+}
+.btn-group {
+    gap: 5px;
+}
+
+/* Ensure admin notes remain visible and don't fade out */
+.admin-notes-section {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+    transition: none !important;
+    border: 2px solid #0d6efd;
+    margin-bottom: 20px;
+}
+
+.admin-notes-content {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+    animation: none !important;
+    font-weight: 500;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+/* Prevent any fade or hide animations */
+.admin-notes-section * {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* Make sure the notes stand out */
+.admin-notes-section .card-header {
+    font-weight: 600;
 }
 </style>
 {% endblock %}

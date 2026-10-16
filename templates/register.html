@@ -5,13 +5,40 @@
 {% block content %}
 <div class="container my-5">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-9">
             <div class="card shadow">
                 <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0"><i class="fas fa-user-plus"></i> Student Registration</h3>
+                    <h3 class="mb-0"><i class="fas fa-user-plus"></i> Registration</h3>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ url_for('register') }}">
+                    <!-- Role Selection -->
+                    <div class="mb-4">
+                        <label class="form-label"><strong>I want to register as:</strong></label>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="card role-card" onclick="selectRole('student')" id="studentCard">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-user-graduate fa-3x mb-3 text-primary"></i>
+                                        <h5>Student</h5>
+                                        <p class="small text-muted">Apply to schools</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card role-card" onclick="selectRole('school_admin')" id="adminCard">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-user-tie fa-3x mb-3 text-success"></i>
+                                        <h5>School Admin</h5>
+                                        <p class="small text-muted">Manage school applications</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('register') }}" id="registrationForm">
+                        <input type="hidden" name="role" id="roleInput" value="student">
+
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="full_name" class="form-label">Full Name *</label>
@@ -22,7 +49,7 @@
                                 <input type="text" class="form-control" id="username" name="username" required>
                             </div>
                         </div>
-                        
+
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="email" class="form-label">Email Address *</label>
@@ -31,9 +58,10 @@
                             <div class="col-md-6 mb-3">
                                 <label for="id_number" class="form-label">ID Number *</label>
                                 <input type="text" class="form-control" id="id_number" name="id_number" maxlength="13" required>
+                                <small class="text-muted">13-digit South African ID number</small>
                             </div>
                         </div>
-                        
+
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="phone_number" class="form-label">Phone Number *</label>
@@ -42,31 +70,138 @@
                             <div class="col-md-6 mb-3">
                                 <label for="password" class="form-label">Password *</label>
                                 <input type="password" class="form-control" id="password" name="password" required>
+                                <small class="text-muted">Minimum 6 characters</small>
                             </div>
                         </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="terms" required>
-                                <label class="form-check-label" for="terms">
-                                    I agree to the terms and conditions *
-                                </label>
+
+                        <!-- School Selection (Only for Admin) -->
+                        <div id="schoolSelectionDiv" style="display: none;">
+                            <div class="mb-3">
+                                <label for="school_id" class="form-label">Select School *</label>
+                                <select class="form-control" id="school_id" name="school_id">
+                                    <option value="">-- Select School --</option>
+                                    <!-- Add your school options here -->
+                                    {% if schools %}
+                                        {% for school in schools %}
+                                            <option value="{{ school.id }}">{{ school.name }}</option>
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
                             </div>
                         </div>
-                        
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-user-plus"></i> Register
+
+                        <!-- Student Specific Info (Optional) -->
+                        <div id="studentInfoDiv" style="display: block;">
+                            <!-- Add any student-specific fields here if needed -->
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="fas fa-user-plus"></i> <span id="submitButtonText">Register as Student</span>
                             </button>
                         </div>
+
+                        <div class="text-center mt-3">
+                            <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+                        </div>
                     </form>
-                    
-                    <div class="text-center mt-3">
-                        <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+.role-card {
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 2px solid #e0e0e0;
+}
+
+.role-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.role-card.selected {
+    border: 2px solid #0d6efd;
+    background-color: #e7f1ff;
+}
+
+.role-card.selected-admin {
+    border: 2px solid #198754;
+    background-color: #d1f4e0;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #0d6efd;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+</style>
+
+<script>
+let selectedRole = 'student';
+
+function selectRole(role) {
+    selectedRole = role;
+    document.getElementById('roleInput').value = role;
+    
+    // Update card styling
+    const studentCard = document.getElementById('studentCard');
+    const adminCard = document.getElementById('adminCard');
+    
+    studentCard.classList.remove('selected');
+    adminCard.classList.remove('selected-admin');
+    
+    if (role === 'student') {
+        studentCard.classList.add('selected');
+        document.getElementById('schoolSelectionDiv').style.display = 'none';
+        document.getElementById('studentInfoDiv').style.display = 'block';
+        document.getElementById('school_id').removeAttribute('required');
+        document.getElementById('submitButtonText').textContent = 'Register as Student';
+    } else {
+        adminCard.classList.add('selected-admin');
+        document.getElementById('schoolSelectionDiv').style.display = 'block';
+        document.getElementById('studentInfoDiv').style.display = 'none';
+        document.getElementById('school_id').setAttribute('required', 'required');
+        document.getElementById('submitButtonText').textContent = 'Register as School Admin';
+    }
+}
+
+// Set default selection on page load
+document.addEventListener('DOMContentLoaded', function() {
+    selectRole('student');
+});
+
+// Form validation
+document.getElementById('registrationForm').addEventListener('submit', function(e) {
+    const role = document.getElementById('roleInput').value;
+    
+    if (role === 'school_admin') {
+        const schoolId = document.getElementById('school_id').value;
+        if (!schoolId) {
+            e.preventDefault();
+            alert('Please select a school to manage.');
+            return false;
+        }
+    }
+    
+    const idNumber = document.getElementById('id_number').value;
+    if (!/^\d{13}$/.test(idNumber)) {
+        e.preventDefault();
+        alert('Please enter a valid 13-digit ID number.');
+        return false;
+    }
+    
+    const password = document.getElementById('password').value;
+    if (password.length < 6) {
+        e.preventDefault();
+        alert('Password must be at least 6 characters long.');
+        return false;
+    }
+});
+</script>
 {% endblock %}

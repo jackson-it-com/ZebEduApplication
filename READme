@@ -1,0 +1,258 @@
+# ZebEduApplication 🎓
+
+A web application designed to help South African primary students find and apply to high schools based on location and school performance.
+
+## Features ✨
+
+- **Dual Dashboard System**: Separate interfaces for students and administrators
+- **Location-Based Search**: Automatically detect user location and find nearby schools
+- **School Performance Ranking**: View schools sorted by pass rates and academic performance
+- **Easy Application Process**: Submit applications to multiple schools
+- **User Authentication**: Secure registration, login, and password reset functionality
+- **Admin Panel**: Manage schools, review applications, and monitor system statistics
+
+## Technology Stack 💻
+
+- **Backend**: Python Flask
+- **Database**: SQLite
+- **Frontend**: HTML5, CSS3, JavaScript, Bootstrap 5
+- **Authentication**: Flask-Login
+- **ORM**: SQLAlchemy
+
+## Installation Instructions 🚀
+
+### Prerequisites
+- Python 3.8 or higher
+- pip (Python package manager)
+- VS Code (or any code editor)
+
+### Step 1: Set Up Project Directory
+
+1. Open VS Code
+2. Create a new folder called `ZebEduApplication`
+3. Open this folder in VS Code (File → Open Folder)
+
+### Step 2: Create Folder Structure
+
+Create the following folders inside `ZebEduApplication`:
+```
+ZebEduApplication/
+├── static/
+│   ├── css/
+│   ├── js/
+│   └── images/
+├── templates/
+└── instance/
+```
+
+### Step 3: Install Dependencies
+
+1. Open VS Code terminal (Terminal → New Terminal)
+2. Create a virtual environment:
+   ```bash
+   python -m venv venv
+   ```
+
+3. Activate the virtual environment:
+   - **Windows**:
+     ```bash
+     venv\Scripts\activate
+     ```
+   - **Mac/Linux**:
+     ```bash
+     source venv/bin/activate
+     ```
+
+4. Install required packages:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+### Step 4: Copy All Files
+
+Copy all the artifact files to their respective locations:
+
+- `app.py` → root folder
+- `models.py` → root folder
+- `config.py` → root folder
+- `requirements.txt` → root folder
+- `add_sample_schools.py` → root folder
+- `style.css` → `static/css/` folder
+- `script.js` → `static/js/` folder
+- All HTML files → `templates/` folder
+
+### Step 5: Run the Application
+
+1. Start the Flask application:
+   ```bash
+   python app.py
+   ```
+
+2. You should see output like:
+   ```
+   Default admin created: username='admin', password='admin123'
+   * Running on http://127.0.0.1:5000
+   ```
+
+3. Open your browser and go to: `http://127.0.0.1:5000`
+
+### Step 6: Add Sample Schools (Optional but Recommended)
+
+1. Open a **new terminal** (keep the first one running)
+2. Activate virtual environment again
+3. Run the sample schools script:
+   ```bash
+   python add_sample_schools.py
+   ```
+
+This will add 17 sample South African schools to your database.
+
+## Default Login Credentials 🔑
+
+### Admin Account
+- **Username**: `admin`
+- **Password**: `admin123`
+
+⚠️ **Important**: Change the admin password after first login!
+
+### Student Account
+You need to register a new student account using the "Register" button.
+
+## Usage Guide 📖
+
+### For Students:
+
+1. **Register**: Click "Register" and fill in your details
+2. **Login**: Use your credentials to log in
+3. **Find Schools**: 
+   - Click "Browse Schools" or "Detect My Location"
+   - Filter schools by district
+   - View school details and performance
+4. **Apply**: Click "Apply Now" on any school card
+5. **Track Applications**: View your application status in the dashboard
+
+### For Administrators:
+
+1. **Login**: Use admin credentials
+2. **View Statistics**: See total students, schools, and applications
+3. **Add Schools**: Click "Add New School" to add more schools
+4. **Review Applications**: Approve or reject student applications
+5. **Manage System**: Monitor all activities
+
+## File Structure 📁
+
+```
+ZebEduApplication/
+│
+├── app.py                     # Main Flask application
+├── models.py                  # Database models
+├── config.py                  # Configuration settings
+├── requirements.txt           # Python dependencies
+├── add_sample_schools.py      # Script to add sample data
+├── README.md                  # This file
+│
+├── static/
+│   ├── css/
+│   │   └── style.css         # Custom styles
+│   ├── js/
+│   │   └── script.js         # Custom JavaScript
+│   └── images/               # Image assets
+│
+├── templates/
+│   ├── base.html             # Base template
+│   ├── index.html            # Home page
+│   ├── login.html            # Login page
+│   ├── register.html         # Registration page
+│   ├── forgot_password.html  # Password reset request
+│   ├── reset_password.html   # Password reset form
+│   ├── student_dashboard.html # Student dashboard
+│   ├── admin_dashboard.html  # Admin dashboard
+│   └── schools.html          # Schools listing page
+│
+└── instance/
+    └── zebedu.db             # SQLite database (auto-generated)
+```
+
+## Key Features Explained 🔍
+
+### Location Detection
+The app uses browser geolocation API to detect the user's current location and suggest nearby schools in their district.
+
+### School Performance Ranking
+Schools are automatically sorted by pass rate (when available), helping students make informed decisions.
+
+### Password Reset
+Users can reset their password via email (currently shows reset link in browser - email integration can be added later).
+
+### Responsive Design
+The application is fully responsive and works on desktop, tablet, and mobile devices.
+
+## Customization 🎨
+
+### Adding More Schools
+1. Use the admin panel "Add New School" button, OR
+2. Modify `add_sample_schools.py` and run it again
+
+### Changing Colors
+Edit `static/css/style.css` and modify the CSS variables:
+```css
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    /* etc. */
+}
+```
+
+### Adding Email Functionality
+To enable password reset emails:
+1. Get a Gmail account
+2. Enable "Less secure app access"
+3. Set environment variables:
+   ```bash
+   export MAIL_USERNAME="your-email@gmail.com"
+   export MAIL_PASSWORD="your-password"
+   ```
+
+## Troubleshooting 🔧
+
+### Database Issues
+If you encounter database errors, delete `instance/zebedu.db` and restart the application.
+
+### Port Already in Use
+If port 5000 is busy, change the port in `app.py`:
+```python
+app.run(debug=True, port=5001)
+```
+
+### Module Not Found Errors
+Make sure your virtual environment is activated and all packages are installed:
+```bash
+pip install -r requirements.txt
+```
+
+## Future Enhancements 🚀
+
+- [ ] Email notifications for application status
+- [ ] Document upload for applications
+- [ ] Advanced search filters
+- [ ] School comparison feature
+- [ ] Mobile app version
+- [ ] Integration with Department of Education API
+- [ ] Real-time chat support
+- [ ] Payment gateway for application fees
+
+## Developer Information 👨‍💻
+
+**Developer**: Batshadiba Dipitsi  
+**Phone**: 067 781 8188  
+**Email**: jacksonmahlatse1238@gmail.com
+
+## License 📄
+
+This project is developed for educational purposes.
+
+---
+
+**Happy Coding! 🎉**
+
+For any issues or questions, contact the developer using the information above.
